@@ -33,11 +33,14 @@
 #define CLR_SCRN()  write(STDOUT_FILENO, "\x1b[2J", 4);
 #define RESET_CUR() write(STDOUT_FILENO, "\x1b[H", 3);
 
+// block some keys
 enum ed_keys {
-  ARR_L = 100,
+  BACKSPACE = 127,
+  ARR_L = 1000,
   ARR_R,
   ARR_U,
-  ARR_D
+  ARR_D,
+  DEL_KEY
 };
 
 /* data */
@@ -163,6 +166,24 @@ void _appnd_row(char* s, size_t len){
   _update_row(&E.row[at]);
 }
 
+void insertchar(erow* row, int at, int c){
+  if(at < 0 || at > row->size) at = row->size;
+  row->chars = realloc(row->chars, row->size + 2);
+  memmove(&row->chars[at + 1], &row->chars[at], row->size - at + 1);
+  row->size++;
+  row->chars[at] = c;
+  _update_row(row);
+}
+
+/* editor operations */
+void insert_char_ed(int c){
+  if(E.cy == E.numrows) {
+    _appnd_row("", 0);
+  }  
+  insertchar(&E.row[E.cy], E.cx, c);
+  E.cx++;
+}
+
 /* file io */
 void open_file(char* file) {
   free(E.filename);
@@ -230,7 +251,7 @@ void _draw_rows(struct abuf *ab) {
       if (E.numrows == 0 && y == E.screenrows / 3) {
         char welcome[80];
         int welcomelen = snprintf(welcome, sizeof(welcome),
-          "Kilo editor -- version %s", ATX_VER);
+          "ATX editor v%s", ATX_VER);
         if (welcomelen > E.screencols) welcomelen = E.screencols;
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {
@@ -364,6 +385,16 @@ void process_key(){
   int c = read_key();
 
   switch (c) {
+    case '\r':
+      // ...
+      break;
+    case BACKSPACE:
+    case CTRL_KEY('h'):
+    case DEL_KEY:
+      // ...
+      break;
+
+    // other
     case CTRL_KEY('q'):
       write(STDOUT_FILENO, "\x1b[2J", 4);
       write(STDOUT_FILENO, "\x1b[H", 3);
@@ -375,6 +406,13 @@ void process_key(){
     case ARR_L:
     case ARR_R:
       editor_mv_cur(c);
+      break;
+
+    case CTRL_KEY('l'):
+    case '\x1b':
+      break;
+    default:
+      insert_char_ed(c);
       break;
   }
 }
