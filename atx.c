@@ -47,16 +47,21 @@ enum ed_keys {
 // highlighting
 enum highlight_ed {
   HL_NORMAL = 0,
+  HL_COMMENT,
+  HL_STRING,
   HL_NUMBER
 };
 
+// highlighting
 #define HL_NUM (1<<0)
+#define HL_STR (1<<1)
 
 /* data */
 
 struct edit_syntax {
   char* filetype;
   char** filematch;
+  char* singline_comment_start;
   int flags;
 };
 
@@ -97,7 +102,8 @@ struct edit_syntax HLDB[] = {
   {
     "c",
     C_HL_extensions,
-    HL_NUM
+    "//",
+    HL_NUM | HL_STR
   },
 };
 
@@ -176,13 +182,43 @@ void update_syntax(erow* row){
 
   if(E.e_syntax == NULL) return;
 
-  int prev_sep = 1;
+  char* scs = E.e_syntax->singleline_comment_start;
+  int scs_len = scs ? strlen(scs) : 0;
+
+  int prev_sep  = 1;
+  int in_string = 0;
 
   int i = 0;
   while(i < row->rsize){
     char c = row->render[i];
     unsigned char prev_hl = (i > 0) ? row->hl[i-1] : HL_NORMAL;
+    // comments
+    if(scs_len && !in_string) {
+      if(!strncmp(&row->render[i], scs, scs_len)) {
+        memset(&row->hl[i], HL_COMMENT, row->rsize - i);
+        break;
+      }
+    }
 
+    // strings
+    if(E.e_syntax->flags & HL_STR){
+      if(in_string){
+        row->hl[i] = HL_STRING;
+        if(c == in_string) in_string = 0;
+        i++;
+        prev_sep = 1;
+        continue;
+      } else {
+        if(c == '"' || c == '\''){
+          in_string = c;
+          row->hl[i] = HL_STRING;
+          i++;
+          continue;
+        }
+      }
+    }
+
+    // numbers
     if(E.e_syntax->flags & HL_NUM){
       if(isdigit(c) && (prev_sep || prev_hl == HL_NUMBER)) {
         row->hl[i] = HL_NUMBER;
@@ -199,8 +235,9 @@ void update_syntax(erow* row){
 
 int syntax_to_cl(int hl){
   switch(hl) {
-    case HL_NUMBER:
-      return 31;
+    case HL_NUMBER: return 31;
+    case HL_STRING: return 35;
+    case HL_COMMENT: return 36; 
     default: return 37;
   }
 }
