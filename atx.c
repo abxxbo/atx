@@ -52,6 +52,8 @@ typedef struct erow {
 struct _edit_conf {
   // Cursor
   int cx, cy;
+  // Tabs
+  int rx;     // Tabs + cursor impl
   // Scrolling
   int rowoff; // vert
   int coloff; // horiz
@@ -127,12 +129,11 @@ int get_win_size(int* rows, int* colums){
   return 0;
 }
 
-/* row ops */
 void _update_row(erow * row){
   int tabs = 0;
   for(int j = 0; j < row->size; j++) if(row->chars[j] == '\t') tabs++;
   free(row->render);
-  row->render = malloc(row->size + tabs*(KILO_TAB_STOP - 1) + 1);
+  row->render = malloc(row->size + tabs*(ATX_TAB - 1) + 1);
 
   int idx = 0;
   for(int j = 0; j < row->size; j++){
@@ -199,6 +200,7 @@ void ab_free(struct abuf *ab){
 
 /* output */
 void edit_scroll(){
+  E.rx = E.cx;
   // Vert
   if (E.cy < E.rowoff) {
     E.rowoff = E.cy;
@@ -208,11 +210,11 @@ void edit_scroll(){
   }
 
   // Horiz
-  if(E.cx < E.coloff) {
-    E.coloff = E.cx;
+  if(E.rx < E.coloff) {
+    E.coloff = E.rx;
   }
-  if(E.cx >= E.coloff + E.screencols) {
-    E.coloff = E.cx - E.screencols + 1;
+  if(E.rx >= E.coloff + E.screencols) {
+    E.coloff = E.rx - E.screencols + 1;
   }
 }
 
@@ -261,7 +263,7 @@ void _refresh() {
   _draw_rows(&ab);
 
   char buf[32];
-  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, (E.cx - E.coloff) + 1);
+  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, (E.rx - E.coloff) + 1);
   ab_append(&ab, buf, strlen(buf));
 
   ab_append(&ab, "\x1b[?25h", 6);
@@ -349,6 +351,7 @@ void process_key(){
 void _init_editor() {
   E.cx = 0;
   E.cy = 0;
+  E.rx = 0;
   E.rowoff = 0;
   E.coloff = 0;
   E.numrows = 0;
