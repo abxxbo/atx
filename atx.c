@@ -123,8 +123,9 @@ char* C_HL_keywords[] = {
 char* ASMI_HL_extensions[] = { ".asm", NULL };
 char* ASMI_HL_keywords[] = {
   "mov", "bytes", "jmp", "jnz", "je", "jne", "jg", "jl",
-  "lgdt", "or", "test", "cpuid", "add", "sub", "mul", "ax|", 
-  "bx|", "cx|", "dx|", "ah|", "bh|", "ch|", "dh|", "al|", "bl", 
+  "lgdt", "or", "test", "cpuid", "add", "sub", "mul", 
+  
+  "ax|", "bx|", "cx|", "dx|", "ah|", "bh|", "ch|", "dh|", "al|", "bl", 
   "cl", "dl", "eax|", "ecx|", "edx|", "ebx|", "esp|", "ebp|", "esi|", "edi|",
   "rax|", "rcx|", "rdx|", "rbx|", "rsp|", "rbp|", "rsi|", "rdi|", NULL
 };
