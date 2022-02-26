@@ -68,6 +68,8 @@ struct _edit_conf {
   erow* row;
   // status bar
   char* filename;
+  // is modified?
+  int dirty;    // 0 = clean ; 1 = dirty
   struct termios orig_termios;
 };
 struct _edit_conf E;
@@ -160,11 +162,13 @@ void _appnd_row(char* s, size_t len){
   E.row[at].chars = malloc(len + 1);
   memcpy(E.row[at].chars, s, len);
   E.row[at].chars[len] = '\0';
-  E.numrows++;
-
+  
   E.row[at].rsize  = 0;
   E.row[at].render = NULL;
   _update_row(&E.row[at]);
+
+  E.numrows++;
+  E.dirty++;
 }
 
 void insertchar(erow* row, int at, int c){
@@ -174,6 +178,7 @@ void insertchar(erow* row, int at, int c){
   row->size++;
   row->chars[at] = c;
   _update_row(row);
+  E.dirty++;
 }
 
 /* editor operations */
@@ -219,6 +224,7 @@ void open_file(char* file) {
   }
   free(line);
   fclose(fp);
+  E.dirty = 0;
 }
 
 void save_file() {
@@ -230,6 +236,7 @@ void save_file() {
   ftruncate(fd, len);
   write(fd, buf, len);
   close(fd);
+  E.dirty = 0;
   free(buf);
 }
 
@@ -308,8 +315,8 @@ void _draw_rows(struct abuf *ab) {
 void status_bar(struct abuf* ab){
   ab_append(ab, "\x1b[7m", 4); // invert colors
   char status[80], rstatus[80];
-  int len = snprintf(status, sizeof(status), "File: %s",
-        E.filename ? E.filename : "Untitled");
+  int len = snprintf(status, sizeof(status), "File: %s %s",
+        E.filename ? E.filename : "Untitled", E.dirty ? "(modified)" : "");
   
   
   int rlen;
@@ -461,6 +468,7 @@ void _init_editor() {
   E.coloff = 0;
   E.numrows = 0;
   E.row = NULL;
+  E.dirty = 0;
   E.filename = NULL;
   if(get_win_size(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
   E.screenrows -= 1;
