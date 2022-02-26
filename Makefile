@@ -1,5 +1,5 @@
 CC := cc
-CFLAGS := -Wall -Wextra -pedantic -std=c99
+CFLAGS := -Wall -Wextra -pedantic -std=c99 -Iinclude/
 
 ## Default to usr
 ## Change with
@@ -8,9 +8,9 @@ INSTALL_PREFIX ?= /usr
 
 .PHONY: atx
 
-atx: atx.c
+atx: src/atx.c
 	@echo CC $^
-	@$(CC) $^ -o $@ $(CFLAGS)
+	@$(CC) $^ -o ./$@ $(CFLAGS)
 
 clean: ./atx
 	@echo RM $^
