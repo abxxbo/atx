@@ -105,6 +105,8 @@ struct _edit_conf {
 struct _edit_conf E;
 
 /* filetypes */
+
+// C/C++
 char* C_HL_extensions[] = { ".c", ".h", ".cpp", ".hpp", NULL };
 char* C_HL_keywords[] = {
   "switch", "if", "while", "for", "break", "continue", "return",
@@ -115,6 +117,20 @@ char* C_HL_keywords[] = {
   "void|", NULL
 };
 
+// Assembly
+
+/// Intel
+char* ASMI_HL_extensions[] = { ".asm", NULL };
+char* ASMI_HL_keywords[] = {
+  "mov", "bytes", "jmp", "jnz", "je", "jne", "jg", "jl",
+  "lgdt", "or", "test", "cpuid", "add", "sub", "mul", "ax|", 
+  "bx|", "cx|", "dx|", "ah|", "bh|", "ch|", "dh|", "al|", "bl", 
+  "cl", "dl", "eax|", "ecx|", "edx|", "ebx|", "esp|", "ebp|", "esi|", "edi|",
+  "rax|", "rcx|", "rdx|", "rbx|", "rsp|", "rbp|", "rsi|", "rdi|", NULL
+};
+
+/// AT&T (ew)
+
 struct edit_syntax HLDB[] = {
   {
     "c",
@@ -123,6 +139,13 @@ struct edit_syntax HLDB[] = {
     "//", "/*", "*/",
     HL_NUM | HL_STR
   },
+  {
+    "intel-asm",
+    ASMI_HL_extensions,
+    ASMI_HL_keywords,
+    ";;", ";;", ";;",
+    HL_NUM | HL_STR
+  }
 };
 
 #define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
