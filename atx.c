@@ -466,7 +466,11 @@ void _init_editor() {
   E.screenrows -= 1;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
+  if(strcmp(argv[1], "--help") == 0){
+    printf("Ctrl+S -- Save\nCtrl+Q -- Quit\n");
+    exit(0);
+  }
   // Enter raw mode
   _enable_raw();
   // Initialize editor
