@@ -1,3 +1,5 @@
+/* includes */
+
 #include <stdio.h>
 
 #include <errno.h>
@@ -6,14 +8,16 @@
 #include <termios.h>
 #include <unistd.h>
 
-// error handling
+/* data */
+
+struct termios orig_termios;
+
+/* terminal */
+
 void die(const char* fmt){
   perror(fmt);
   exit(1);
 }
-
-// Raw mode
-struct termios orig_termios;
 
 void disable_raw() {
   if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
@@ -39,6 +43,7 @@ void _enable_raw() {
   if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
+/* init */
 int main() {
   // Enter raw mode
   _enable_raw();
