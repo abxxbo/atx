@@ -50,7 +50,8 @@ struct _edit_conf {
   // Cursor
   int cx, cy;
   // Scrolling
-  int rowoff;
+  int rowoff; // vert
+  int coloff; // horiz
   // Screen
   int screenrows;
   int screencols;
@@ -174,11 +175,20 @@ void ab_free(struct abuf *ab){
 
 /* output */
 void edit_scroll(){
+  // Vert
   if (E.cy < E.rowoff) {
     E.rowoff = E.cy;
   }
   if (E.cy >= E.rowoff + E.screenrows) {
     E.rowoff = E.cy - E.screenrows + 1;
+  }
+
+  // Horiz
+  if(E.cx < E.coloff) {
+    E.coloff = E.cx;
+  }
+  if(E.cx >= E.coloff + E.screencols) {
+    E.coloff = E.cx - E.screencols + 1;
   }
 }
 
@@ -203,9 +213,10 @@ void _draw_rows(struct abuf *ab) {
         ab_append(ab, "~", 1);
       }
     } else {
-      int len = E.row[filerow].size;
+      int len = E.row[filerow].size - E.coloff;
+      if(len < 0) len = 0;
       if (len > E.screencols) len = E.screencols;
-      ab_append(ab, E.row[filerow].chars, len);
+      ab_append(ab, &E.row[filerow].chars[E.coloff], len);
     }
 
     ab_append(ab, "\x1b[K", 3);
@@ -226,7 +237,7 @@ void _refresh() {
   _draw_rows(&ab);
 
   char buf[32];
-  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
+  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, (E.cx - E.coloff) + 1);
   ab_append(&ab, buf, strlen(buf));
 
   ab_append(&ab, "\x1b[?25h", 6);
@@ -262,12 +273,22 @@ int read_key() {
 
 
 void editor_mv_cur(int key) {
+  erow* row = (E.cy >= E.numrows) ? NULL : &E.row[E.cy];
+
   switch (key) {
     case ARR_L:
       if(E.cx != 0) E.cx--;
+      else if(E.cy > 0) {
+        E.cy--;
+        E.cx = E.row[E.cy].size;
+      }
       break;
     case ARR_R:
-      if(E.cx != E.screencols - 1) E.cx++;
+      if(row && E.cx < row->size) E.cx++;
+      else if(row && E.cx == row->size){
+        E.cy++;
+        E.cx = 0;
+      }
       break;
     case ARR_U:
       if(E.cy != 0) E.cy--;
@@ -276,6 +297,10 @@ void editor_mv_cur(int key) {
       if(E.cy < E.numrows) E.cy++;
       break;
   }
+
+  row = (E.cy >= E.numrows) ? NULL : &E.row[E.cy];
+  int rowlen = row ? row->size : 0;
+  if (E.cx > rowlen) E.cx = rowlen;
 }
 void process_key(){
   int c = read_key();
@@ -301,6 +326,7 @@ void _init_editor() {
   E.cx = 0;
   E.cy = 0;
   E.rowoff = 0;
+  E.coloff = 0;
   E.numrows = 0;
   E.row = NULL;
   if(get_win_size(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
