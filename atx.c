@@ -48,6 +48,7 @@ enum ed_keys {
 enum highlight_ed {
   HL_NORMAL = 0,
   HL_COMMENT,
+  HL_MLCOMMENT,
   HL_TYPES,     // int, bool, etc (set to NULL if none)
   HL_KEYWORDS,
   HL_STRING,
@@ -65,10 +66,14 @@ struct edit_syntax {
   char** filematch;
   char** keywords;
   char* singline_comment_start;
+  char* multiline_comment_start;
+  char* multiline_comment_end;
   int flags;
 };
 
 typedef struct erow {
+  int idx;
+  int hl_open_comment;
   int size;
   int rsize;
   char* chars;
@@ -115,7 +120,7 @@ struct edit_syntax HLDB[] = {
     "c",
     C_HL_extensions,
     C_HL_keywords,
-    "//",
+    "//", "/*", "*/",
     HL_NUM | HL_STR
   },
 };
@@ -198,23 +203,20 @@ void update_syntax(erow* row){
   char** keywords = E.e_syntax->keywords;
 
   char* scs = E.e_syntax->singline_comment_start;
+  char* mcs = E.e_syntax->multiline_comment_start;
+  char* mce = E.e_syntax->multiline_comment_end;
   int scs_len = scs ? strlen(scs) : 0;
+  int mcs_len = mcs ? strlen(mcs) : 0;
+  int mce_len = mce ? strlen(mce) : 0;
 
   int prev_sep  = 1;
   int in_string = 0;
+  int in_comment = (row->idx > 0 && E.row[row->idx - 1].hl_open_comment);
 
   int i = 0;
   while(i < row->rsize){
     char c = row->render[i];
     unsigned char prev_hl = (i > 0) ? row->hl[i-1] : HL_NORMAL;
-    // comments
-    if(scs_len && !in_string) {
-      if(!strncmp(&row->render[i], scs, scs_len)) {
-        memset(&row->hl[i], HL_COMMENT, row->rsize - i);
-        break;
-      }
-    }
-
     // strings
     if(E.e_syntax->flags & HL_STR){
       if(in_string){
@@ -230,6 +232,36 @@ void update_syntax(erow* row){
           i++;
           continue;
         }
+      }
+    }
+
+    // comments
+    if(scs_len && !in_string && !in_comment) {
+      if(!strncmp(&row->render[i], scs, scs_len)) {
+        memset(&row->hl[i], HL_COMMENT, row->rsize - i);
+        break;
+      }
+    }
+
+    // multi-line comments
+    if(mcs_len && mce_len && !in_string) {
+      if(in_comment) {
+        row->hl[i] = HL_MLCOMMENT;
+        if(!strncmp(&row->render[i], mce, mce_len)) {
+          memset(&row->hl[i], HL_MLCOMMENT, mce_len);
+          i += mce_len;
+          in_comment = 0;
+          prev_sep = 1;
+          continue;
+        } else {
+          i++;
+          continue;
+        }
+      } else if(!strncmp(&row->render[i], mcs, mcs_len)) {
+        memset(&row->hl[i], HL_MLCOMMENT, mcs_len);
+        i += mcs_len;
+        in_comment = 1;
+        continue;
       }
     }
 
@@ -267,6 +299,10 @@ void update_syntax(erow* row){
     prev_sep = is_seperator(c);
     i++;
   }
+
+  int changed = (row->hl_open_comment != in_comment);
+  row->hl_open_comment = in_comment;
+  if(changed && row->idx + 1 < E.numrows) update_syntax(&E.row[row->idx+1]);
 }
 
 int syntax_to_cl(int hl){
@@ -275,6 +311,7 @@ int syntax_to_cl(int hl){
     case HL_KEYWORDS: return 32; // magenta
     case HL_TYPES: return 33;    // yellow
     case HL_STRING: return 35;   // magenta
+    case HL_MLCOMMENT:
     case HL_COMMENT: return 36;  // cyan
     default: return 37;
   }
@@ -324,6 +361,9 @@ void _appnd_row(int at, char* s, size_t len){
 
   E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
   memmove(&E.row[at + 1], &E.row[at], sizeof(erow) * (E.numrows - at));
+  for(int j = at + 1; j <= E.numrows; j++) E.row[j].idx++;
+
+  E.row[at].idx = at;
 
   E.row[at].size = len;
   E.row[at].chars = malloc(len + 1);
@@ -333,6 +373,7 @@ void _appnd_row(int at, char* s, size_t len){
   E.row[at].rsize  = 0;
   E.row[at].render = NULL;
   E.row[at].hl = NULL;
+  E.row[at].hl_open_comment = 0;
   _update_row(&E.row[at]);
 
   E.numrows++;
@@ -349,6 +390,7 @@ void del_row(int at){
   if(at < 0 || at >= E.numrows) return;
   free_row(&E.row[at]);
   memmove(&E.row[at], &E.row[at + 1], sizeof(erow) * (E.numrows - at - 1));
+  for(int j = at; j < E.numrows - 1; j++) E.row[j].idx--;
   E.numrows--;
   E.dirty++;
 }
