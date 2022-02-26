@@ -1,19 +1,27 @@
 #include <stdio.h>
 
+#include <errno.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
 
+// error handling
+void die(const char* fmt){
+  perror(fmt);
+  exit(1);
+}
+
 // Raw mode
 struct termios orig_termios;
 
 void disable_raw() {
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+  if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
+    die("tcsetattr");
 }
 
 void _enable_raw() {
-  tcgetattr(STDIN_FILENO, &orig_termios);
+  if(tcgetattr(STDIN_FILENO, &orig_termios) == -1) die("tcgetattr");
   atexit(disable_raw);
 
   struct termios raw = orig_termios;
@@ -28,7 +36,7 @@ void _enable_raw() {
   raw.c_cc[VMIN]  = 0;
   raw.c_cc[VTIME] = 1;
   
-  tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+  if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
 int main() {
@@ -37,7 +45,7 @@ int main() {
 
   while(1){
     char c = '\0';
-    read(STDIN_FILENO, &c, 1);
+    if(read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) die("read");
     if(iscntrl(c)){
       printf("%d\r\n", c);
     } else {
