@@ -11,6 +11,10 @@
 #include <sys/ioctl.h>
 
 /* defines */
+
+// atx version
+#define ATX_VER "0.0.1-beta"
+
 // Get ctrl key equiv of a character
 #define CTRL_KEY(n) ((n) & 0x1f)
 
@@ -21,6 +25,9 @@
 /* data */
 
 struct _edit_conf {
+  // Cursor
+  int cx, cy;
+  // Screen
   int screenrows;
   int screencols;
   struct termios orig_termios;
@@ -98,7 +105,7 @@ struct abuf {
 };
 
 void ab_append(struct abuf* ab, const char* fmt, int len){
-  char* new = realloc(ab->, ab->len + len);
+  char* new = realloc(ab->b, ab->len + len);
   if(new == NULL) return;
   memcpy(&new[ab->len], fmt, len);
   ab->b = new;
@@ -112,7 +119,20 @@ void ab_free(struct abuf *ab){
 /* output */
 void _draw_rows(struct abuf* ab) {
   for(int y = 0; y < E.screenrows; y++){
-    ab_append(ab, "~", 1);
+    if(y == E.screenrows / 3){
+      // welcome!
+      char welcome[80];
+      int welcomelen = snprintf(welcome, sizeof(welcome),
+                                "ATX v%s", ATX_VER);
+      if(welcomelen > E.screencols) welcomelen = E.screencols;
+      int padding = (E.screencols - welcomelen) / 2;
+      if(padding) {
+        ab_append(ab, "~", 1);
+        padding--;
+      }
+      while(padding --) ab_append(ab, " ", 1);
+      ab_append(ab, welcome, welcomelen);
+    } else ab_append(ab, "~", 1);
 
     ab_append(ab, "\x1b[K", 3);
     if(y < E.screenrows - 1) ab_append(ab, "\r\n", 2);
@@ -128,7 +148,7 @@ void _refresh(){
   _draw_rows(&ab);
 
   ab_append(&ab, "\x1b[H", 3);
-  ap_append(&ab, "\x1b[?25h", 6);
+  ab_append(&ab, "\x1b[?25h", 6);
   write(STDOUT_FILENO, ab.b, ab.len);
   ab_free(&ab);
 }
@@ -156,6 +176,8 @@ void process_key() {
 
 /* init */
 void _init_editor() {
+  E.cx = 0;
+  E.cy = 0;
   if(get_win_size(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
 }
 
@@ -166,9 +188,8 @@ int main() {
   _init_editor();
 
   while(1){
-    CLR_SCRN();   // Clears buffer
-    RESET_CUR();  // Repositions cursor
-    process_key();
+    _refresh();     // Clears buffer
+    process_key();  // Repositions cursor
   }
   return 0;
 }
