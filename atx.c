@@ -823,7 +823,9 @@ void _init_editor() {
 
 int main(int argc, char** argv) {
   if(strcmp(argv[1], "--help") == 0){
-    printf("Ctrl+S -- Save\nCtrl+Q -- Quit\n");
+    printf("Usage: atx [file]\n\n");
+    printf("Available arguments:\n--help => this message\n\n");
+    printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n");
     exit(0);
   }
   // Enter raw mode
