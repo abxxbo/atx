@@ -13,6 +13,7 @@
 
 #include <errno.h>
 #include <ctype.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
@@ -185,6 +186,22 @@ void insert_char_ed(int c){
 }
 
 /* file io */
+char* rows_to_str(int* buflen){
+  int totlen = 0;
+  for(int j = 0; j < E.numrows; j++) totlen += E.row[j].size + 1;
+  *buflen = totlen;
+
+  char* buf = malloc(totlen);
+  char* p = buf;
+  for(int j = 0; j < E.numrows; j++){
+    memcpy(p, E.row[j].chars, E.row[j].size);
+    p += E.row[j].size;
+    *p = '\n';
+    p++;
+  }
+  return buf;
+}
+
 void open_file(char* file) {
   free(E.filename);
   E.filename = strdup(file);
@@ -202,6 +219,18 @@ void open_file(char* file) {
   }
   free(line);
   fclose(fp);
+}
+
+void save_file() {
+  if(E.filename == NULL) return;
+
+  int len;
+  char* buf = rows_to_str(&len);
+  int fd = open(E.filename, O_RDWR | O_CREAT, 0644);
+  ftruncate(fd, len);
+  write(fd, buf, len);
+  close(fd);
+  free(buf);
 }
 
 /* append buffer */
@@ -394,13 +423,19 @@ void process_key(){
       // ...
       break;
 
-    // other
+    // exit
     case CTRL_KEY('q'):
       write(STDOUT_FILENO, "\x1b[2J", 4);
       write(STDOUT_FILENO, "\x1b[H", 3);
       exit(0);
       break;
 
+    // save file
+    case CTRL_KEY('s'):
+      save_file();
+      break;
+    
+    // other
     case ARR_U:
     case ARR_D:
     case ARR_L:
