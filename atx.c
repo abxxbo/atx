@@ -485,7 +485,12 @@ void open_file(char* file) {
   sel_syn();
 
   FILE* fp = fopen(file, "r");
-  if(!fp) die("fopen");
+  if(!fp){
+    // Create the file
+    FILE* fp2 = fopen(file, "a");
+    fclose(fp2);
+    fp = fopen(file, "r");
+  }
 
   char* line = NULL;
   size_t linecap = 0;
