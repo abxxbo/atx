@@ -23,10 +23,10 @@
 #define RESET_CUR() write(STDOUT_FILENO, "\x1b[H", 3);
 
 enum ed_keys {
-  ARR_L = 'a',
-  ARR_R = 'd',
-  ARR_U = 'w',
-  ARR_D = 's'
+  ARR_L = 100,
+  ARR_R,
+  ARR_U,
+  ARR_D
 };
 
 /* data */
@@ -165,7 +165,7 @@ void _refresh() {
 }
 
 /* input */
-char read_key() {
+int read_key() {
   int nread;
   char c;
   while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
@@ -190,24 +190,24 @@ char read_key() {
 }
 
 
-void editor_mv_cur(char key) {
+void editor_mv_cur(int key) {
   switch (key) {
     case ARR_L:
-      E.cx--;
+      if(E.cx != 0) E.cx--;
       break;
     case ARR_R:
-      E.cx++;
+      if(E.cx != E.screencols - 1) E.cx++;
       break;
     case ARR_U:
-      E.cy--;
+      if(E.cy != 0) E.cy--;
       break;
     case ARR_D:
-      E.cy++;
+      if(E.cy != E.screenrows - 1) E.cy++;
       break;
   }
 }
 void process_key(){
-  char c = read_key();
+  int c = read_key();
 
   switch (c) {
     case CTRL_KEY('q'):
