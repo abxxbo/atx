@@ -1,6 +1,10 @@
 # atx
 abxxbo's text editor
 
+# Screenshots
+![dh](img/c-styl.png)
+<p><em>ATX editing a C file with C style syntax highlighting</em></p>
+
 ## Dependencies
 - make
 - Any C compiler
