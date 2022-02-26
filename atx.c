@@ -17,8 +17,16 @@ void _enable_raw() {
   atexit(disable_raw);
 
   struct termios raw = orig_termios;
-  raw.c_iflag &= ~(IXON);
-  raw.c_lflag &= ~(ECHO | ICANON | ISIG);
+  
+  // flags
+  raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+  raw.c_oflag &= ~(OPOST);
+  raw.c_cflag |= (CS8);
+  raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+  
+  // Timeout for read
+  raw.c_cc[VMIN]  = 0;
+  raw.c_cc[VTIME] = 1;
   
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
@@ -27,14 +35,16 @@ int main() {
   // Enter raw mode
   _enable_raw();
 
-  char c;
-  // Use 'q' to quit
-  while(read(STDIN_FILENO, &c, 1) == 1 && c != 'q'){
+  while(1){
+    char c = '\0';
+    read(STDIN_FILENO, &c, 1);
     if(iscntrl(c)){
-      printf("%d\n", c);
+      printf("%d\r\n", c);
     } else {
-      printf("%d ('%c')\n", c, c);
+      printf("%d ('%c')\r\n", c, c);
     }
+    // Exit on q
+    if(c == 'q') break;
   }
   return 0;
 }
