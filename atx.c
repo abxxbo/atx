@@ -139,7 +139,7 @@ void _draw_rows(struct abuf* ab) {
   }
 }
 
-void _refresh(){
+void _refresh() {
   struct abuf ab = ABUF_INIT;
 
   ab_append(&ab, "\x1b[?25l", 6);
@@ -147,8 +147,12 @@ void _refresh(){
 
   _draw_rows(&ab);
 
-  ab_append(&ab, "\x1b[H", 3);
+  char buf[32];
+  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
+  ab_append(&ab, buf, strlen(buf));
+
   ab_append(&ab, "\x1b[?25h", 6);
+
   write(STDOUT_FILENO, ab.b, ab.len);
   ab_free(&ab);
 }
@@ -156,20 +160,60 @@ void _refresh(){
 /* input */
 char read_key() {
   int nread;
-  char ch;
-  while((nread = read(STDIN_FILENO, &ch, 1)) != 1) {
-    if(nread == -1 && errno != EAGAIN) die("read");
+  char c;
+  while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
+    if (nread == -1 && errno != EAGAIN) die("read");
   }
-  return ch;
+  if (c == '\x1b') {
+    char seq[3];
+    if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
+    if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
+    if (seq[0] == '[') {
+      switch (seq[1]) {
+        case 'A': return 'w';
+        case 'B': return 's';
+        case 'C': return 'd';
+        case 'D': return 'a';
+      }
+    }
+    return '\x1b';
+  } else {
+    return c;
+  }
 }
 
-void process_key() {
-  char ch = read_key();
-  switch(ch){
-    case CTRL_KEY('q'): // Ctrl-q
-      CLR_SCRN();
-      RESET_CUR();
+
+void editor_mv_cur(char key) {
+  switch (key) {
+    case 'a':
+      E.cx--;
+      break;
+    case 'd':
+      E.cx++;
+      break;
+    case 'w':
+      E.cy--;
+      break;
+    case 's':
+      E.cy++;
+      break;
+  }
+}
+void process_key(){
+  char c = read_key();
+
+  switch (c) {
+    case CTRL_KEY('q'):
+      write(STDOUT_FILENO, "\x1b[2J", 4);
+      write(STDOUT_FILENO, "\x1b[H", 3);
       exit(0);
+      break;
+
+    case 'w':
+    case 's':
+    case 'a':
+    case 'd':
+      editor_mv_cur(c);
       break;
   }
 }
