@@ -24,6 +24,7 @@
 
 // atx version
 #define ATX_VER "0.0.1-beta"
+#define ATX_TAB 2           // 8 < 2 in terms of tabs
 
 // Get ctrl key equiv of a character
 #define CTRL_KEY(n) ((n) & 0x1f)
@@ -43,7 +44,9 @@ enum ed_keys {
 
 typedef struct erow {
   int size;
-  char *chars;
+  int rsize;
+  char* chars;
+  char* render;
 } erow;
 
 struct _edit_conf {
@@ -125,6 +128,23 @@ int get_win_size(int* rows, int* colums){
 }
 
 /* row ops */
+void _update_row(erow * row){
+  int tabs = 0;
+  for(int j = 0; j < row->size; j++) if(row->chars[j] == '\t') tabs++;
+  free(row->render);
+  row->render = malloc(row->size + tabs*(KILO_TAB_STOP - 1) + 1);
+
+  int idx = 0;
+  for(int j = 0; j < row->size; j++){
+    if(row->chars[j] == '\t') {
+      row->render[idx++] = ' ';
+      while(idx % ATX_TAB != 0) row->render[idx++] = ' ';
+    } else row->render[idx++] = row->chars[j];
+  }
+  row->render[idx] = '\0';
+  row->rsize = idx;
+}
+
 void _appnd_row(char* s, size_t len){
   E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
 
@@ -134,6 +154,10 @@ void _appnd_row(char* s, size_t len){
   memcpy(E.row[at].chars, s, len);
   E.row[at].chars[len] = '\0';
   E.numrows++;
+
+  E.row[at].rsize  = 0;
+  E.row[at].render = NULL;
+  _update_row(&E.row[at]);
 }
 
 /* file io */
@@ -213,10 +237,10 @@ void _draw_rows(struct abuf *ab) {
         ab_append(ab, "~", 1);
       }
     } else {
-      int len = E.row[filerow].size - E.coloff;
+      int len = E.row[filerow].rsize - E.coloff;
       if(len < 0) len = 0;
       if (len > E.screencols) len = E.screencols;
-      ab_append(ab, &E.row[filerow].chars[E.coloff], len);
+      ab_append(ab, &E.row[filerow].render[E.coloff], len);
     }
 
     ab_append(ab, "\x1b[K", 3);
