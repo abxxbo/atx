@@ -62,6 +62,8 @@ struct _edit_conf {
   int screencols;
   int numrows;
   erow* row;
+  // status bar
+  char* filename;
   struct termios orig_termios;
 };
 struct _edit_conf E;
@@ -163,6 +165,8 @@ void _appnd_row(char* s, size_t len){
 
 /* file io */
 void open_file(char* file) {
+  free(E.filename);
+  E.filename = strdup(file);
   FILE* fp = fopen(file, "r");
   if(!fp) die("fopen");
 
@@ -246,12 +250,39 @@ void _draw_rows(struct abuf *ab) {
     }
 
     ab_append(ab, "\x1b[K", 3);
-    if (y < E.screenrows - 1) {
-      ab_append(ab, "\r\n", 2);
-    }
+    ab_append(ab, "\r\n", 2);
   }
 }
 
+// status bar!
+void status_bar(struct abuf* ab){
+  ab_append(ab, "\x1b[7m", 4); // invert colors
+  char status[80], rstatus[80];
+  int len = snprintf(status, sizeof(status), "File: %s",
+        E.filename ? E.filename : "Untitled");
+  
+  
+  int rlen;
+  if(E.numrows != 404){
+    rlen = snprintf(rstatus, sizeof(rstatus), "Line %d of %d",
+      E.cy + 1, E.numrows);
+  } else {
+    rlen = snprintf(rstatus, sizeof(rstatus), "Line %d of [LINES NOT FOUND]",
+        E.cy + 1);
+  }
+  if(len > E.screencols) len = E.screencols;
+  ab_append(ab, status, len);
+  while(len < E.screencols) {
+    if(E.screencols - len == rlen) {
+      ab_append(ab, rstatus, rlen);
+      break;
+    } else {
+      ab_append(ab, " ", 1);
+      len++;
+    }
+  }
+  ab_append(ab, "\x1b[m", 3); // revert to normal
+}
 
 void _refresh() {
   edit_scroll();
@@ -261,6 +292,7 @@ void _refresh() {
   ab_append(&ab, "\x1b[H", 3);
 
   _draw_rows(&ab);
+  status_bar(&ab);
 
   char buf[32];
   snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, (E.rx - E.coloff) + 1);
@@ -356,7 +388,9 @@ void _init_editor() {
   E.coloff = 0;
   E.numrows = 0;
   E.row = NULL;
+  E.filename = NULL;
   if(get_win_size(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
+  E.screenrows -= 1;
 }
 
 int main(int argc, char* argv[]) {
