@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/ioctl.h>
 
 /* defines */
@@ -59,16 +60,77 @@ void _enable_raw() {
   if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
+int get_cur_pos(int *rows, int *cols){
+  char buf[32];
+  unsigned int i = 0;
+
+  if(write(STDOUT_FILENO, "\x1b[6n", 4) != 4) return -1;
+  
+  while(i < sizeof(buf) - 1){
+    if(read(STDIN_FILENO, &buf[i], 1) != 1) break;
+    if(buf[i] == 'R') break;
+    i++;
+  }
+  buf[i] = '\0';
+
+  if(buf[0] != '\x1b' || buf[1] != '[') return -1;
+  if(sscanf(&buf[2], "%d;%d", rows, cols) != 2) return -1;
+
+  return 0;
+}
+
+int get_win_size(int* rows, int* colums){
+  struct winsize ws;
+  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
+    if(write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12) return -1;
+    return get_cur_pos(rows, colums);
+  }
+  *colums = ws.ws_col;
+  *rows   = ws.ws_row;
+  return 0;
+}
+
+/* append buffer */
+#define ABUF_INIT {NULL, 0}
+struct abuf {
+  char* b;
+  int len;
+};
+
+void ab_append(struct abuf* ab, const char* fmt, int len){
+  char* new = realloc(ab->, ab->len + len);
+  if(new == NULL) return;
+  memcpy(&new[ab->len], fmt, len);
+  ab->b = new;
+  ab->len += len;
+}
+
+void ab_free(struct abuf *ab){
+  free(ab->b);
+}
+
 /* output */
-void _draw_rows() {
-  for(int y = 0; y < E.screenrows; y++) write(STDOUT_FILENO, "~\r\n", 3);
+void _draw_rows(struct abuf* ab) {
+  for(int y = 0; y < E.screenrows; y++){
+    ab_append(ab, "~", 1);
+
+    ab_append(ab, "\x1b[K", 3);
+    if(y < E.screenrows - 1) ab_append(ab, "\r\n", 2);
+  }
 }
 
 void _refresh(){
-  CLR_SCRN();
-  RESET_CUR();
-  _draw_rows();
-  RESET_CUR();
+  struct abuf ab = ABUF_INIT;
+
+  ab_append(&ab, "\x1b[?25l", 6);
+  ab_append(&ab, "\x1b[H", 3);
+
+  _draw_rows(&ab);
+
+  ab_append(&ab, "\x1b[H", 3);
+  ap_append(&ab, "\x1b[?25h", 6);
+  write(STDOUT_FILENO, ab.b, ab.len);
+  ab_free(&ab);
 }
 
 /* input */
@@ -79,29 +141,6 @@ char read_key() {
     if(nread == -1 && errno != EAGAIN) die("read");
   }
   return ch;
-}
-
-int get_cur_pos(int *rows, int *cols){
-  if(write(STDOUT_FILENO, "\x1b[6n", 4) != 4) return -1;
-  printf("\r\n");
-  char c;
-  while(read(STDIN_FILENO, &c, 1) == 1){
-    if(iscntrl(c)) printf("%d\r\n", c);
-    else printf("%d ('%c')\r\n", c, c);
-  }
-  read_key();
-  return -1;
-}
-
-int get_win_size(int* rows, int* colums){
-  struct winsize ws;
-  if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0){
-    if(write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12) return -1;
-    return get_cur_pos(rows, colums);
-  }
-  *colums = ws.ws_col;
-  *rows   = ws.ws_row;
-  return 0;
 }
 
 void process_key() {
