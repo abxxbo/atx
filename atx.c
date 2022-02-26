@@ -49,6 +49,8 @@ typedef struct erow {
 struct _edit_conf {
   // Cursor
   int cx, cy;
+  // Scrolling
+  int rowoff;
   // Screen
   int screenrows;
   int screencols;
@@ -171,35 +173,51 @@ void ab_free(struct abuf *ab){
 }
 
 /* output */
-void _draw_rows(struct abuf* ab) {
-  for(int y = 0; y < E.screenrows; y++){
-    if(y >= E.numrows){
-      if(E.numrows == 0 && y == E.screenrows / 3){
-        // welcome!
-        char welcome[80];
-        int welcomelen = snprintf(welcome, sizeof(welcome),
-                                  "ATX v%s", ATX_VER);
-        if(welcomelen > E.screencols) welcomelen = E.screencols;
-        int padding = (E.screencols - welcomelen) / 2;
-        if(padding) {
-          ab_append(ab, "~", 1);
-          padding--;
-        }
-        while(padding --) ab_append(ab, " ", 1);
-        ab_append(ab, welcome, welcomelen);
-      } else ab_append(ab, "~", 1);
-
-    } else {
-      int len = E.row[y].size;
-      if(len > E.screencols) len = E.screencols;
-      ab_append(ab, E.row[y].chars, len);
-    }
-    ab_append(ab, "\x1b[K", 3);
-    if(y < E.screenrows - 1) ab_append(ab, "\r\n", 2);
+void edit_scroll(){
+  if (E.cy < E.rowoff) {
+    E.rowoff = E.cy;
+  }
+  if (E.cy >= E.rowoff + E.screenrows) {
+    E.rowoff = E.cy - E.screenrows + 1;
   }
 }
 
+void _draw_rows(struct abuf *ab) {
+  int y;
+  for (y = 0; y < E.screenrows; y++) {
+    int filerow = y + E.rowoff;
+    if (filerow >= E.numrows) {
+      if (E.numrows == 0 && y == E.screenrows / 3) {
+        char welcome[80];
+        int welcomelen = snprintf(welcome, sizeof(welcome),
+          "Kilo editor -- version %s", ATX_VER);
+        if (welcomelen > E.screencols) welcomelen = E.screencols;
+        int padding = (E.screencols - welcomelen) / 2;
+        if (padding) {
+          ab_append(ab, "~", 1);
+          padding--;
+        }
+        while (padding--) ab_append(ab, " ", 1);
+        ab_append(ab, welcome, welcomelen);
+      } else {
+        ab_append(ab, "~", 1);
+      }
+    } else {
+      int len = E.row[filerow].size;
+      if (len > E.screencols) len = E.screencols;
+      ab_append(ab, E.row[filerow].chars, len);
+    }
+
+    ab_append(ab, "\x1b[K", 3);
+    if (y < E.screenrows - 1) {
+      ab_append(ab, "\r\n", 2);
+    }
+  }
+}
+
+
 void _refresh() {
+  edit_scroll();
   struct abuf ab = ABUF_INIT;
 
   ab_append(&ab, "\x1b[?25l", 6);
@@ -255,7 +273,7 @@ void editor_mv_cur(int key) {
       if(E.cy != 0) E.cy--;
       break;
     case ARR_D:
-      if(E.cy != E.screenrows - 1) E.cy++;
+      if(E.cy < E.numrows) E.cy++;
       break;
   }
 }
@@ -282,6 +300,7 @@ void process_key(){
 void _init_editor() {
   E.cx = 0;
   E.cy = 0;
+  E.rowoff = 0;
   E.numrows = 0;
   E.row = NULL;
   if(get_win_size(&E.screenrows, &E.screencols) == -1) die("getWindowSize");
