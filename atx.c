@@ -48,6 +48,8 @@ enum ed_keys {
 enum highlight_ed {
   HL_NORMAL = 0,
   HL_COMMENT,
+  HL_TYPES,     // int, bool, etc (set to NULL if none)
+  HL_KEYWORDS,
   HL_STRING,
   HL_NUMBER
 };
@@ -61,6 +63,7 @@ enum highlight_ed {
 struct edit_syntax {
   char* filetype;
   char** filematch;
+  char** keywords;
   char* singline_comment_start;
   int flags;
 };
@@ -96,12 +99,22 @@ struct _edit_conf {
 };
 struct _edit_conf E;
 
-/* filetype */
+/* filetypes */
 char* C_HL_extensions[] = { ".c", ".h", ".cpp", ".hpp", NULL };
+char* C_HL_keywords[] = {
+  "switch", "if", "while", "for", "break", "continue", "return",
+  "else", "struct", "union", "typedef", "static", "enum", "class",
+  "case", "#include", "#define", "{", "}",
+
+  "int|", "long|", "double|", "float|", "char|", "unsigned|", "signed|",
+  "void|", NULL
+};
+
 struct edit_syntax HLDB[] = {
   {
     "c",
     C_HL_extensions,
+    C_HL_keywords,
     "//",
     HL_NUM | HL_STR
   },
@@ -182,7 +195,9 @@ void update_syntax(erow* row){
 
   if(E.e_syntax == NULL) return;
 
-  char* scs = E.e_syntax->singleline_comment_start;
+  char** keywords = E.e_syntax->keywords;
+
+  char* scs = E.e_syntax->singline_comment_start;
   int scs_len = scs ? strlen(scs) : 0;
 
   int prev_sep  = 1;
@@ -228,6 +243,27 @@ void update_syntax(erow* row){
       }
     }
 
+    // keywords
+    if(prev_sep){
+      int j;
+      for(j = 0; keywords[j]; j++){
+        int klen = strlen(keywords[j]);
+        int kw2  = keywords[j][klen - 1] == '|';
+        if(kw2) klen--;
+
+        if(!strncmp(&row->render[i], keywords[j], klen) &&
+            is_seperator(row->render[i + klen])){
+          memset(&row->hl[i], kw2 ? HL_KEYWORDS : HL_TYPES, klen);
+          i += klen;
+          break;
+        }
+      }
+      if(keywords[j] != NULL) {
+        prev_sep = 0;
+        continue;
+      }
+    }
+
     prev_sep = is_seperator(c);
     i++;
   }
@@ -235,9 +271,11 @@ void update_syntax(erow* row){
 
 int syntax_to_cl(int hl){
   switch(hl) {
-    case HL_NUMBER: return 31;
-    case HL_STRING: return 35;
-    case HL_COMMENT: return 36; 
+    case HL_NUMBER: return 31;   // red
+    case HL_KEYWORDS: return 32; // magenta
+    case HL_TYPES: return 33;    // yellow
+    case HL_STRING: return 35;   // magenta
+    case HL_COMMENT: return 36;  // cyan
     default: return 37;
   }
 }
