@@ -22,6 +22,13 @@
 #define CLR_SCRN()  write(STDOUT_FILENO, "\x1b[2J", 4);
 #define RESET_CUR() write(STDOUT_FILENO, "\x1b[H", 3);
 
+enum ed_keys {
+  ARR_L = 'a',
+  ARR_R = 'd',
+  ARR_U = 'w',
+  ARR_D = 's'
+};
+
 /* data */
 
 struct _edit_conf {
@@ -170,10 +177,10 @@ char read_key() {
     if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
     if (seq[0] == '[') {
       switch (seq[1]) {
-        case 'A': return 'w';
-        case 'B': return 's';
-        case 'C': return 'd';
-        case 'D': return 'a';
+        case 'A': return ARR_U;
+        case 'B': return ARR_D;
+        case 'C': return ARR_R;
+        case 'D': return ARR_L;
       }
     }
     return '\x1b';
@@ -185,16 +192,16 @@ char read_key() {
 
 void editor_mv_cur(char key) {
   switch (key) {
-    case 'a':
+    case ARR_L:
       E.cx--;
       break;
-    case 'd':
+    case ARR_R:
       E.cx++;
       break;
-    case 'w':
+    case ARR_U:
       E.cy--;
       break;
-    case 's':
+    case ARR_D:
       E.cy++;
       break;
   }
@@ -209,10 +216,10 @@ void process_key(){
       exit(0);
       break;
 
-    case 'w':
-    case 's':
-    case 'a':
-    case 'd':
+    case ARR_U:
+    case ARR_D:
+    case ARR_L:
+    case ARR_R:
       editor_mv_cur(c);
       break;
   }
