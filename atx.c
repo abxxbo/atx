@@ -154,10 +154,12 @@ void _update_row(erow * row){
   row->rsize = idx;
 }
 
-void _appnd_row(char* s, size_t len){
-  E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
+void _appnd_row(int at, char* s, size_t len){
+  if(at < 0 || at > E.numrows) return;
 
-  int at = E.numrows;
+  E.row = realloc(E.row, sizeof(erow) * (E.numrows + 1));
+  memmove(&E.row[at + 1], &E.row[at], sizeof(erow) * (E.numrows - at));
+
   E.row[at].size = len;
   E.row[at].chars = malloc(len + 1);
   memcpy(E.row[at].chars, s, len);
@@ -171,6 +173,19 @@ void _appnd_row(char* s, size_t len){
   E.dirty++;
 }
 
+void free_row(erow *row){
+  free(row->render);
+  free(row->chars);
+}
+
+void del_row(int at){
+  if(at < 0 || at >= E.numrows) return;
+  free_row(&E.row[at]);
+  memmove(&E.row[at], &E.row[at + 1], sizeof(erow) * (E.numrows - at - 1));
+  E.numrows--;
+  E.dirty++;
+}
+
 void insertchar(erow* row, int at, int c){
   if(at < 0 || at > row->size) at = row->size;
   row->chars = realloc(row->chars, row->size + 2);
@@ -181,13 +196,60 @@ void insertchar(erow* row, int at, int c){
   E.dirty++;
 }
 
+void appnd_to_end(erow* row, char* s, size_t len){
+  row->chars = realloc(row->chars, row->size + len + 1);
+  memcpy(&row->chars[row->size], s, len);
+  row->size += len;
+  row->chars[row->size] = '\0';
+  _update_row(row);
+  E.dirty++;
+}
+
+void del_chr(erow *row, int at){
+  if(at < 0 || at >= row->size) return;
+  memmove(&row->chars[at], &row->chars[at + 1], row->size - at);
+  row->size--;
+  _update_row(row);
+  E.dirty++;
+}
+
 /* editor operations */
 void insert_char_ed(int c){
   if(E.cy == E.numrows) {
-    _appnd_row("", 0);
+    _appnd_row(E.numrows, "", 0);
   }  
   insertchar(&E.row[E.cy], E.cx, c);
   E.cx++;
+}
+
+void insert_nline() {
+  if(E.cx == 0){
+    _appnd_row(E.cy, "", 0);
+  } else {
+    erow* row = &E.row[E.cy];
+    _appnd_row(E.cy + 1, &row->chars[E.cx], row->size - E.cx);
+    row = &E.row[E.cy];
+    row->size = E.cx;
+    row->chars[row->size] = '\0';
+    _update_row(row);
+  }
+  E.cy++;
+  E.cx = 0;
+}
+
+void del_char_ed() {
+  if(E.cy == E.numrows) return;
+  if(E.cx == 0 && E.cy == 0) return;
+  erow* row = &E.row[E.cy];
+  if(E.cx > 0) {
+    del_chr(row, E.cx - 1);
+    E.cx--;
+  } else {
+    E.cx = E.row[E.cy - 1].size;
+    appnd_to_end(&E.row[E.cy - 1], row->chars, row->size);
+    del_row(E.cy);
+    E.cy--;
+  }
 }
 
 /* file io */
@@ -220,7 +282,7 @@ void open_file(char* file) {
     while(linelen > 0 && (line[linelen - 1] == '\n' ||
                           line[linelen - 1] == '\r'))
       linelen--;
-    _appnd_row(line, linelen);
+    _appnd_row(E.numrows, line, linelen);
   }
   free(line);
   fclose(fp);
@@ -422,12 +484,12 @@ void process_key(){
 
   switch (c) {
     case '\r':
-      // ...
+      insert_nline();
       break;
     case BACKSPACE:
-    case CTRL_KEY('h'):
     case DEL_KEY:
-      // ...
+      if(c == DEL_KEY) editor_mv_cur(ARR_R);
+      del_char_ed();
       break;
 
     // exit
