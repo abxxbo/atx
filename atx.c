@@ -132,7 +132,22 @@ char* ASMI_HL_keywords[] = {
 
 /// AT&T (ew)
 
+
+// Python
+char* PY_HL_extensions[] = { ".py", NULL };
+char* PY_HL_keywords[] = {
+  "and", "as", "assert", "async", "await", "break", "class", "continue",
+  "def", "del", "elif", "else", "except", "finally", "for", "from", "global",
+  "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass",
+  "raise", "return", "try", "while", "with", "yield",
+
+  "False|", "None|", "True|", "int|", "float|", "tuple|", "dict|", "str|",
+  NULL
+};
+
+// DB of syntax highlighting
 struct edit_syntax HLDB[] = {
+  // Systems languages
   {
     "c",
     C_HL_extensions,
@@ -145,6 +160,14 @@ struct edit_syntax HLDB[] = {
     ASMI_HL_extensions,
     ASMI_HL_keywords,
     ";;", ";;", ";;",
+    HL_NUM | HL_STR
+  },
+  // Higher level languages
+  {
+    "py",
+    PY_HL_extensions,
+    PY_HL_keywords,
+    "#", "\"\"\"", "\"\"\"",
     HL_NUM | HL_STR
   }
 };
