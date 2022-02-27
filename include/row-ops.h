@@ -14,12 +14,30 @@
 
 #include "editor.h"
 #include "highlighting.h"
+#include "input.h"
 
 struct _edit_conf E;
 
+int rxtocx(erow *row, int rx) {
+  int cur_rx = 0;
+  int cx;
+  for (cx = 0; cx < row->size; cx++) {
+    if (row->chars[cx] == '\t')
+      cur_rx += (ATX_TAB - 1) - (cur_rx % ATX_TAB);
+    cur_rx++;
+    if (cur_rx > rx) return cx;
+  }
+  return cx;
+}
+
 void _update_row(erow * row){
   int tabs = 0;
-  for(int j = 0; j < row->size; j++) if(row->chars[j] == '\t') tabs++;
+  for(int j = 0; j < row->size; j++) {
+    // move cursor +1
+    if(row->chars[j] == '\t'){
+      tabs++;
+    }  
+  }
   free(row->render);
   row->render = malloc(row->size + tabs*(ATX_TAB - 1) + 1);
 

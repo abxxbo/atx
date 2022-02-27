@@ -23,6 +23,7 @@ enum ed_keys {
 
 #include "file-io.h"
 #include "terminal.h"
+#include "find.h"
 
 int read_key() {
   int nread;
@@ -99,7 +100,11 @@ void process_key(){
       write(STDOUT_FILENO, "\x1b[H", 3);
       exit(0);
       break;
-
+    
+    // keyword finder
+    case CTRL_KEY('f'):
+      editor_find();
+      break;
     // save file
     case CTRL_KEY('s'):
       save_file();
@@ -119,5 +124,49 @@ void process_key(){
     default:
       insert_char_ed(c);
       break;
+  }
+}
+
+void set_status(const char *fmt, ...);
+char* editor_prompt(char* prompt);
+
+void set_status(const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(E.statusmsg, sizeof(E.statusmsg), fmt, ap);
+  va_end(ap);
+}
+
+char *editor_prompt(char *prompt) {
+  size_t bufsize = 128;
+  char *buf = malloc(bufsize);
+
+  size_t buflen = 0;
+  buf[0] = '\0';
+
+  while (1) {
+    set_status(prompt, buf);
+    _refresh();
+
+    int c = read_key();
+    if (c == DEL_KEY || c == CTRL_KEY('h') || c == BACKSPACE) {
+      if (buflen != 0) buf[--buflen] = '\0';
+    } else if (c == '\x1b') {
+      set_status("");
+      free(buf);
+      return NULL;
+    } else if (c == '\r') {
+      if (buflen != 0) {
+        set_status("");
+        return buf;
+      }
+    } else if (!iscntrl(c) && c < 128) {
+      if (buflen == bufsize - 1) {
+        bufsize *= 2;
+        buf = realloc(buf, bufsize);
+      }
+      buf[buflen++] = c;
+      buf[buflen] = '\0';
+    }
   }
 }
