@@ -7,7 +7,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 CC := cc
-CFLAGS := -Wall -Wextra -pedantic -std=c99 -Iinclude/
+CFLAGS := -Wall -Wextra -pedantic -std=c99 -Iinclude/editor/
 
 ## Default to usr
 ## Change with
@@ -20,9 +20,9 @@ atx: src/atx.c
 	@echo CC $^
 	@$(CC) $^ -o ./$@ $(CFLAGS)
 
-clean: ./atx
-	@echo RM $^
-	@rm $^
+clean:
+	@echo RM atx
+	@rm atx
 
 install: ./atx
 	ifeq($(INSTALL_PREFIX),"/usr")
