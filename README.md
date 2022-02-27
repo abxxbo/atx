@@ -18,7 +18,8 @@ abxxbo's text editor
 <p><em>ATX editing a C file with C style syntax highlighting</em></p>
 <br>
 <br>
-![dhh](img/py-styl.png)
+
+![dh](img/py-styl.png)
 <p><em>ATX editing a Python file with Python syntax highlighting</em></p>
 
 ## Dependencies
