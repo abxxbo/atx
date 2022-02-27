@@ -110,6 +110,11 @@ void process_key(){
       save_file();
       break;
 
+    // exec
+    case CTRL_KEY('e'):
+      editor_exec();
+      break;
+
     // other
     case ARR_U:
     case ARR_D:

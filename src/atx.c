@@ -36,7 +36,8 @@ int main(int argc, char** argv) {
   if(strcmp(argv[1], "--help") == 0){
     printf("Usage: atx [file]\n\n");
     printf("Available arguments:\n--help => this message\n\n");
-    printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n");
+    printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n\nCtrl+F -- find\n");
+    printf("Ctrl+E -- exec command\n");
     exit(0);
   }
   // Enter raw mode

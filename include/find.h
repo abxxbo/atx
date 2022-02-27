@@ -1,3 +1,5 @@
+// im too lazy to change this file name
+// so shut up
 #pragma once
 
 #include <stdio.h>
@@ -36,4 +38,11 @@ void editor_find() {
   }
 
   free(query);
+}
+
+void editor_exec() {
+  char* command = editor_prompt("Type command: %s (ESC to cancel)");
+  // tee hee
+  // TODO: fix later
+  system(command);
 }
