@@ -1,6 +1,15 @@
 # atx
 abxxbo's text editor
 
+## Checklist
+
+### Main
+- [X] Save to file
+- [X] Read file
+- [ ] Line numbers
+- [X] Syntax highlighting
+- [X] Search for keyword
+
 # Screenshots
 ![dh](img/c-styl.png)
 <p><em>ATX editing a C file with C style syntax highlighting</em></p>
