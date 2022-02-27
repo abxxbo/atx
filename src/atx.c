@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 
+// editor/
 #include "input.h"
 #include "editor.h"
 #include "highlighting.h"
@@ -40,6 +41,7 @@ int main(int argc, char** argv) {
     printf("Ctrl+E -- exec command\n");
     exit(0);
   }
+  // Before we do anything, parse config
   // Enter raw mode
   _enable_raw();
   // Initialize editor
