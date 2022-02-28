@@ -34,21 +34,26 @@ void _init_editor() {
 }
 
 int main(int argc, char** argv) {
-  if(strcmp(argv[1], "--help") == 0){
-    printf("Usage: atx [file]\n\n");
-    printf("Available arguments:\n--help => this message\n\n");
-    printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n\nCtrl+F -- find\n");
-    printf("Ctrl+E -- exec command\n");
-    exit(0);
-  }
-  // Before we do anything, parse config
+ if(argc >= 2){ 
+		if(strcmp(argv[1], "--help") == 0){
+      printf("Usage: atx [file]\n\n");
+   	  printf("Available arguments:\n--help => this message\n\n");
+  	  printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n\nCtrl+F -- find\n");
+ 	    printf("Ctrl+E -- exec command\n");
+	    exit(0);
+ 	 	}
+	}
+
+	// Before we do anything, parse config
   // Enter raw mode
   _enable_raw();
   // Initialize editor
   _init_editor();
 
-  if(argc >= 2){
-    open_file(argv[1]);
+	if(argc == 1){
+		open_file("/tmp/Untitled");
+	} else if(argc >= 2){
+  	open_file(argv[1]);
   }
 
   while(1){

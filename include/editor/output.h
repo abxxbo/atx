@@ -93,10 +93,8 @@ void _draw_rows(struct abuf *ab) {
 void status_bar(struct abuf* ab){
   ab_append(ab, "\x1b[7m", 4); // invert colors
   char status[80], rstatus[80];
-  int len = snprintf(status, sizeof(status), "File: %s %s",
-        E.filename ? E.filename : "Untitled", E.dirty ? "(modified)" : "");
-  
-  
+ 	int len = snprintf(status, sizeof(status), "File: %s %s", E.filename, E.dirty ? "(modified)" : "");
+
   int rlen;
   if(E.numrows != 404){
     rlen = snprintf(rstatus, sizeof(rstatus), "Line %d of %d (ft: %s)",
