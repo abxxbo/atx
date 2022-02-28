@@ -19,8 +19,9 @@
 struct _edit_conf E;
 
 void edit_scroll(){
-  E.rx = E.cx;
-  // Vert
+	E.rx = 0;
+ 	if(E.cy < E.numrows) E.rx = cxtorx(&E.row[E.cy], E.cx);	
+	// Vert
   if (E.cy < E.rowoff) {
     E.rowoff = E.cy;
   }

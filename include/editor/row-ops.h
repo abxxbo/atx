@@ -18,6 +18,16 @@
 
 struct _edit_conf E;
 
+int cxtorx(erow* row, int cx){
+  int rx = 0;
+  int j;
+  for(j = 0; j < cx; j++){
+    if(row->chars[j] == '\t') rx += (ATX_TAB - 1) - (rx % ATX_TAB);
+    rx++;
+  }
+  return rx;
+}
+
 int rxtocx(erow *row, int rx) {
   int cur_rx = 0;
   int cx;
@@ -35,7 +45,7 @@ void _update_row(erow * row){
   for(int j = 0; j < row->size; j++) {
     // move cursor +1
     if(row->chars[j] == '\t'){
-      tabs++;
+			tabs++;
     }  
   }
   free(row->render);
