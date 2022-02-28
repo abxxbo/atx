@@ -1,4 +1,4 @@
-<img align="center" src="img/logo.png"/>
+<p align="center"><img src="https://media.discordapp.net/attachments/905219914774741002/947699828526317588/d.png"/></p>
 abxxbo's text editor
 
 ## Checklist
