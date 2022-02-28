@@ -42,7 +42,22 @@ void editor_find() {
 
 void editor_exec() {
   char* command = editor_prompt("Type command: %s (ESC to cancel)");
-  // tee hee
-  // TODO: fix later
-  system(command);
+ 	char path[1035]; 
+	// note that this is fixed, due to Issue #1.
+	FILE* fp;		// store in /tmp/file_out.txt
+	FILE* tmp;	// temporary, used only for getting output.
+	fp = popen(command, "r");
+	if(!fp) {
+		// set editor prompt to  'failed to run command'
+		editor_prompt("Failed to run command");
+	}
+	// create the file
+	system("touch /tmp/file_out.txt");
+	tmp = fopen("/tmp/file_out.txt", "w");
+	while(fgets(path, sizeof(path), fp) != NULL){
+		// write to file
+		fputs(path, tmp);
+	}
+	pclose(fp);
+	fclose(tmp);
 }
