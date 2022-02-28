@@ -24,11 +24,6 @@ clean:
 	@echo RM atx
 	@rm atx
 
-install: ./atx
-	ifeq($(INSTALL_PREFIX),"/usr")
-		@echo CP $^ => /usr/local/bin/atx
-		@sudo cp ./atx /usr/local/bin/atx
-	else
-		@echo CP $^ => $(INSTALL_PREFIX)/atx
-		@sudo cp ./atx $(INSTALL_PREFIX)/atx
-	endif
+install:
+	@echo CP ./atx => /usr/local/bin/atx
+	@sudo cp ./atx /usr/local/bin/atx
