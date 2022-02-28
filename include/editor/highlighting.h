@@ -40,6 +40,14 @@ char* C_HL_keywords[] = {
   "void|", NULL
 };
 
+// KessC
+char* KESS_C_HL_ext[] = { ".kessc", NULL };
+char* KESS_C_HL_keywords[] = {
+	"printf",
+
+	"uint8|", NULL
+};
+
 // Assembly
 
 /// Intel
@@ -78,6 +86,13 @@ struct edit_syntax HLDB[] = {
     "//", "/*", "*/",
     HL_NUM | HL_STR
   },
+	{
+		"kessc",
+		KESS_C_HL_ext,
+		KESS_C_HL_keywords,
+		"//", "/*", "*/",
+		HL_NUM | HL_STR
+	},
   {
     "intel-asm",
     ASMI_HL_extensions,
