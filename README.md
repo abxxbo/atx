@@ -1,4 +1,4 @@
-# atx
+<img align="center" src="img/logo.png"/>
 abxxbo's text editor
 
 ## Checklist
