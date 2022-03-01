@@ -6,7 +6,9 @@ enum ed_keys {
   ARR_R,
   ARR_U,
   ARR_D,
-  DEL_KEY
+  DEL_KEY,
+	HOME_KEY,
+	END_KEY
 };
 
 #include <stdio.h>
@@ -36,11 +38,22 @@ int read_key() {
     if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
     if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
     if (seq[0] == '[') {
-      switch (seq[1]) {
-        case 'A': return ARR_U;
-        case 'B': return ARR_D;
-        case 'C': return ARR_R;
-        case 'D': return ARR_L;
+      if(seq[1] >= '0' && seq[1] <= '9') {
+        if(read(STDIN_FILENO, &seq[2], 1) != 1) return '\x1b';
+        if(seq[2] == '~') {
+          switch(seq[1]) {
+            case '1': return HOME_KEY;
+            case '3': return DEL_KEY;
+            case '4': return END_KEY;
+            }
+          }
+      } else {
+        switch (seq[1]) {
+          case 'A': return ARR_U;
+          case 'B': return ARR_D;
+          case 'C': return ARR_R;
+          case 'D': return ARR_L;
+        }
       }
     }
     return '\x1b';
@@ -88,12 +101,21 @@ void process_key(){
     case '\r':
       insert_nline();
       break;
-    case BACKSPACE:
-    case DEL_KEY:
-      if(c == DEL_KEY) editor_mv_cur(ARR_R);
-      del_char_ed();
-      break;
 
+		case HOME_KEY:
+			E.cx = 0;
+			break;
+
+		case END_KEY:
+			if(E.cy < E.numrows) E.cx = E.row[E.cy].size;
+			break;
+
+    case BACKSPACE:
+		case CTRL_KEY('h'):
+		case DEL_KEY:
+			if(c == DEL_KEY) editor_mv_cur(ARR_R);
+			del_char_ed();
+			break;
     // exit
     case CTRL_KEY('q'):
       write(STDOUT_FILENO, "\x1b[2J", 4);
