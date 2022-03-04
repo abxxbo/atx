@@ -7,7 +7,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 CC := cc
-CFLAGS := -Wall -Wextra -pedantic -std=c99 -Iinclude/editor/
+CFLAGS := -Wall -Wextra -pedantic -std=c99 -Iinclude/editor/ -Iinclude/
 
 ## Default to usr
 ## Change with

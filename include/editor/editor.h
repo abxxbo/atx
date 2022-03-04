@@ -45,6 +45,12 @@ struct _edit_conf {
   char statusmsg[80];
 };
 
+int tabs;
+
+void set_tabs_to(int tabss){
+  tabs = tabss;
+}
+
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -60,7 +66,7 @@ struct _edit_conf {
 #define ATX_VER "0.0.1-beta"
 #include "output.h"
 
-#define ATX_TAB 2
+#define ATX_TAB tabs
 
 #define CTRL_KEY(n) ((n) & 0x1f)
 

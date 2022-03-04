@@ -17,6 +17,9 @@
 #include "highlighting.h"
 #include "terminal.h"
 
+// config
+#include "config/config.h"
+
 /* init */
 void _init_editor() {
   E.cx = 0;
@@ -48,7 +51,8 @@ int main(int argc, char** argv) {
 	}
 
 	// Before we do anything, parse config
-  // Enter raw mode
+	parse_config(); 
+	// Enter raw mode
   _enable_raw();
   // Initialize editor
   _init_editor();
