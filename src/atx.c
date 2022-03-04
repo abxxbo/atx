@@ -37,18 +37,19 @@ void _init_editor() {
 }
 
 int main(int argc, char** argv) {
- if(argc >= 2){ 
-		if(strcmp(argv[1], "--help") == 0){
+  // set tabs to 2, i'm an idiot
+  if(argc >= 2){ 
+    if(strcmp(argv[1], "--help") == 0){
       printf("Usage: atx [file]\n\n");
-   	  printf("Available arguments:\n--help => this message\n\n");
-  	  printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n\nCtrl+F -- find\n");
+     	printf("Available arguments:\n--help => this message\n\n");
+    	printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n\nCtrl+F -- find\n");
  	    printf("Ctrl+E -- exec command\n\n\nControl key help:\n");
-			printf("Ctrl+E -- output of command is stored in /tmp/file_out.txt\n");
-			printf("Ctrl+F -- it will go to the first instance of thing to search\n");
-			printf("Ctrl+S -- common sense..\nCtrl+Q -- common sense..\n");
+  		printf("Ctrl+E -- output of command is stored in /tmp/file_out.txt\n");
+	  	printf("Ctrl+F -- it will go to the first instance of thing to search\n");
+		  printf("Ctrl+S -- common sense..\nCtrl+Q -- common sense..\n");
 	    exit(0);
- 	 	}
-	}
+ 	  }
+  }
 
 	// Before we do anything, parse config
 	parse_config(); 

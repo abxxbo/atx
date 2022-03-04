@@ -15,22 +15,15 @@
 
 #include "other/logger.h"
 
-int check_for_file() {
-	FILE* fp = fopen(".atxrc", "r");
-	if(!fp) fatal_log("No config file found."); // File doesn't exist.
-	fclose(fp);
-	return 0;					// it do exist
-}
-
-
 // parse file
 void parse_config() {
-	int config = check_for_file();
-	if(config == 1) exit(1);
+	// Stupid fucking fix to segfault ig?
+  system("touch .atxrc"); // this won't overwrite anyn data i dont think
 
-	// Ok, file exists, not we can parse
+  // Ok, file exists, not we can parse
 	// just need to open it and then parse
 	FILE* _fp = fopen(".atxrc", "r");
+  if(_fp) return;
 
 	// Put into a variable
 	char* buffer = 0;
@@ -54,6 +47,7 @@ void parse_config() {
 		}
 		if(atoi(splitted) != 0 && is_tabs == 1){
 			set_tabs_to(atoi(splitted));
+
 		}
 		// loop
 		splitted = strtok(NULL, delim);

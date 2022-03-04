@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-void fatal_log(const char* fmt){
-  fprintf(stderr, "[FATAL] %s\n", fmt);
-  exit(2);
+void non_fatal_log(const char* fmt){
+  fprintf(stderr, "[NON-FATAL] %s\n", fmt);
 }
