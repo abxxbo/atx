@@ -44,6 +44,13 @@ This is a list of all milestones that have been accomplished.
 - [c62184f - status bar](https://github.com/abxxbo/atx/commit/c62184f978dc3566cfc4189cb7242492905c3a3d)
 - [9e069fc - write to a file](https://github.com/abxxbo/atx/commit/9e069fc73c8675074e67a6a5cc70267778939dca)
 
+# How to configure ATX?
+```sh
+# Needs an .atxrc in current dir.
+# Set tabs to 2
+tabs 2
+```
+
 # Is this a good replacement for X?
 Depends on the editor
 
