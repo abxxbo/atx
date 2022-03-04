@@ -13,6 +13,9 @@ abxxbo's text editor
 ## Other
 - [ ] Config file for ATX
 
+# Screencast
+![dh](img/screencast.gif)
+
 # Screenshots
 ![dh](img/c-styl.png)
 <p><em>ATX editing a C file with C style syntax highlighting</em></p>
