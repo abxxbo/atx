@@ -13,9 +13,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#include "other/logger.h"
+
 int check_for_file() {
 	FILE* fp = fopen(".atxrc", "r");
-	if(!fp) return 1; // File doesn't exist.
+	if(!fp) fatal_log("No config file found."); // File doesn't exist.
 	fclose(fp);
 	return 0;					// it do exist
 }
