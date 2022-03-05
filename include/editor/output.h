@@ -14,6 +14,7 @@
 
 #include "append_buffer.h"
 #include "editor.h"
+#include "row-ops.h"
 #include "highlighting.h"
 
 struct _edit_conf E;

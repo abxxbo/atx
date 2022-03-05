@@ -27,6 +27,8 @@ enum ed_keys {
 #include "terminal.h"
 #include "find.h"
 
+#include "config/config.h"
+
 int read_key() {
   int nread;
   char c;
