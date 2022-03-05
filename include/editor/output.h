@@ -38,7 +38,7 @@ void edit_scroll(){
   }
 }
 
-void _draw_rows(struct abuf *ab) {
+void _draw_rows(struct abuf *ab, char* eob_char) {
   int y;
   for (y = 0; y < E.screenrows; y++) {
     int filerow = y + E.rowoff;
@@ -50,13 +50,13 @@ void _draw_rows(struct abuf *ab) {
         if (welcomelen > E.screencols) welcomelen = E.screencols;
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {
-          ab_append(ab, "~", 1);
+          ab_append(ab, eob_char, 1);
           padding--;
         }
         while (padding--) ab_append(ab, " ", 1);
         ab_append(ab, welcome, welcomelen);
       } else {
-        ab_append(ab, "~", 1);
+        ab_append(ab, eob_char, 1);
       }
     } else {
       int len = E.row[filerow].rsize - E.coloff;
@@ -124,14 +124,14 @@ void draw_msg(struct abuf* ab) {
   ab_append(ab, E.statusmsg, msglen);
 }
 
-void _refresh() {
+void _refresh(char* eob) {
   edit_scroll();
   struct abuf ab = ABUF_INIT;
 
   ab_append(&ab, "\x1b[?25l", 6);
   ab_append(&ab, "\x1b[H", 3);
 
-  _draw_rows(&ab);
+  _draw_rows(&ab, eob);
   status_bar(&ab);
   draw_msg(&ab);
 

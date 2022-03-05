@@ -120,6 +120,7 @@ void process_key(){
     case CTRL_KEY('q'):
       write(STDOUT_FILENO, "\x1b[2J", 4);
       write(STDOUT_FILENO, "\x1b[H", 3);
+      clean_up_config();
       exit(0);
       break;
     
@@ -155,7 +156,7 @@ void process_key(){
 }
 
 void set_status(const char *fmt, ...);
-char* editor_prompt(char* prompt);
+char* editor_prompt(char *prompt, char* eob);
 
 void set_status(const char *fmt, ...) {
   va_list ap;
@@ -164,7 +165,7 @@ void set_status(const char *fmt, ...) {
   va_end(ap);
 }
 
-char *editor_prompt(char *prompt) {
+char *editor_prompt(char *prompt, char* eob) {
   size_t bufsize = 128;
   char *buf = malloc(bufsize);
 
@@ -173,7 +174,7 @@ char *editor_prompt(char *prompt) {
 
   while (1) {
     set_status(prompt, buf);
-    _refresh();
+    _refresh(eob);
 
     int c = read_key();
     if (c == DEL_KEY || c == CTRL_KEY('h') || c == BACKSPACE) {

@@ -50,6 +50,16 @@ int ATX_TAB = 2;
 void set_tabs_to(int n) {
   ATX_TAB = n;
 }
+
+char* eob = "~";
+void set_eob(char* splitted) {
+  if(splitted == NULL){
+    eob = "~";
+  } else {
+    eob = splitted;
+  }
+}
+
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>

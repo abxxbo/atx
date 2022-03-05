@@ -63,9 +63,8 @@ int main(int argc, char** argv) {
 	} else if(argc >= 2){
   	open_file(argv[1]);
   }
-
   while(1){
-    _refresh();     // Clears buffer
+    _refresh(eob);  // Clears buffer
     process_key();  // Repositions cursor
   }
   return 0;

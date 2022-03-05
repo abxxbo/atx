@@ -15,7 +15,8 @@
 
 #include "other/logger.h"
 
-// parse file
+#define ATXRC_CONFIG_LOCATOIN ".atxrc"
+
 void parse_config() {
 	// Stupid fucking fix to segfault ig?
   system("touch .atxrc"); // this won't overwrite anyn data i dont think
@@ -47,9 +48,29 @@ void parse_config() {
 		}
 		if(atoi(splitted) != 0 && is_tabs == 1){
 			set_tabs_to(atoi(splitted));
-
 		}
+
+    // EOB character
+    if(strcmp(splitted, "eob_char") == 0){
+      if(atoi(splitted) == 0 && is_tabs == 0) {
+        set_eob(splitted);
+      }
+    }
 		// loop
 		splitted = strtok(NULL, delim);
 	}
+}
+
+// if config file has nothing in it
+// delete it.
+void clean_up_config() {
+  FILE* fp = fopen(".atxrc", "r");
+  long size;
+  if(fp != NULL){
+    fseek(fp, 0, SEEK_END);
+    size = ftell(fp);
+    if(size == 0){
+      system("rm .atxrc");
+    }
+  }
 }

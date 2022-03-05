@@ -19,10 +19,10 @@
 
 struct _edit_conf E;
 
-char* editor_prompt(char* prompt);
+char* editor_prompt(char* prompt, char* eob);
 
 void editor_find() {
-  char *query = editor_prompt("Search: %s (ESC to cancel)");
+  char *query = editor_prompt("Search: %s (ESC to cancel)", "~");
   if (query == NULL) return;
 
   int i;
@@ -41,7 +41,7 @@ void editor_find() {
 }
 
 void editor_exec() {
-  char* command = editor_prompt("Type command: %s (ESC to cancel)");
+  char* command = editor_prompt("Type command: %s (ESC to cancel)", "~");
  	char path[1035]; 
 	// note that this is fixed, due to Issue #1.
 	FILE* fp;		// store in /tmp/file_out.txt
@@ -49,7 +49,7 @@ void editor_exec() {
 	fp = popen(command, "r");
 	if(!fp) {
 		// set editor prompt to  'failed to run command'
-		editor_prompt("Failed to run command");
+		editor_prompt("Failed to run command", "~");
 	}
 	// create the file
 	system("touch /tmp/file_out.txt");
