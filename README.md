@@ -45,10 +45,21 @@ This is a list of all milestones that have been accomplished.
 - [9e069fc - write to a file](https://github.com/abxxbo/atx/commit/9e069fc73c8675074e67a6a5cc70267778939dca)
 
 # How to configure ATX?
+
+**WARNING!** The configuration system is very WIP, so do not use until this message is gone.
+
+## Setting tab spacing
 ```sh
-# Needs an .atxrc in current dir.
-# Set tabs to 2
-tabs 2
+# Example: tabs 2
+# Default is 2
+tabs [tab spacing]
+```
+
+## Change empty buffer character
+```sh
+# Example: eob_char "."
+# Default is "~"
+eob_char "[character]"
 ```
 
 # Is this a good replacement for X?
