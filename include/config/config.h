@@ -15,15 +15,14 @@
 
 #include "other/logger.h"
 
-#define ATXRC_CONFIG_LOCATOIN ".atxrc"
+#define ATXRC_CONFIG_LOCATION "/home/$(whoami)/.atxrc"
 
 void parse_config() {
-	// Stupid fucking fix to segfault ig?
-  system("touch .atxrc"); // this won't overwrite anyn data i dont think
+  system((char*)malloc(1 + strlen("touch ") + strlen(ATXRC_CONFIG_LOCATION)));
 
   // Ok, file exists, not we can parse
 	// just need to open it and then parse
-	FILE* _fp = fopen(".atxrc", "r");
+	FILE* _fp = fopen(ATXRC_CONFIG_LOCATION, "r");
   if(_fp) return;
 
 	// Put into a variable
@@ -64,7 +63,7 @@ void parse_config() {
 // if config file has nothing in it
 // delete it.
 void clean_up_config() {
-  FILE* fp = fopen(".atxrc", "r");
+  FILE* fp = fopen(ATXRC_CONFIG_LOCATION, "r");
   long size;
   if(fp != NULL){
     fseek(fp, 0, SEEK_END);
