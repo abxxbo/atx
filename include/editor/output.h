@@ -98,13 +98,9 @@ void status_bar(struct abuf* ab){
  	int len = snprintf(status, sizeof(status), "File: %s %s", E.filename, E.dirty ? "(modified)" : "");
 
   int rlen;
-  if(E.numrows != 404){
-    rlen = snprintf(rstatus, sizeof(rstatus), "Line %d of %d (ft: %s)",
-      E.cy + 1, E.numrows, E.e_syntax ? E.e_syntax->filetype : "no ft");
-  } else {
-    rlen = snprintf(rstatus, sizeof(rstatus), "Line %d of [LINES NOT FOUND] (ft: %s)", E.cy + 1, E.e_syntax ? E.e_syntax->filetype : "no ft");
-  }
-  if(len > E.screencols) len = E.screencols;
+  rlen = snprintf(rstatus, sizeof(rstatus), "Line %d of %d ", E.cy, E.numrows);
+  
+	if(len > E.screencols) len = E.screencols;
   ab_append(ab, status, len);
   while(len < E.screencols) {
     if(E.screencols - len == rlen) {
