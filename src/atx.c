@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
   if(argc >= 2){ 
     if(strcmp(argv[1], "--help") == 0){
       printf("Usage: atx [file]\n\n");
-     	printf("Available arguments:\n--help => this message\n\n");
+     	printf("Available arguments:\n--help => this message\n--experimental-plugins => WARNING: Do not use if you do not know what you are doing.\n\n");
     	printf("Keybindings:\nCtrl+S -- save\nCtrl+Q -- quit\n\nCtrl+F -- find\n");
  	    printf("Ctrl+E -- exec command\n\n\nControl key help:\n");
   		printf("Ctrl+E -- output of command is stored in /tmp/file_out.txt\n");
@@ -49,20 +49,25 @@ int main(int argc, char** argv) {
 		  printf("Ctrl+S -- common sense..\nCtrl+Q -- common sense..\n");
 	    exit(0);
  	  }
-  }
 
-	// Before we do anything, parse config
-	parse_config(); 
-	// Enter raw mode
-  _enable_raw();
-  // Initialize editor
+    if(argc == 3){
+      if(strcmp(argv[2], "--experimental-plugins") == 0) {
+        parse_config();
+      }
+    }
+  }
+  eob = "~";
+	
   _init_editor();
 
 	if(argc == 1){
 		open_file("/tmp/Untitled");
-	} else if(argc >= 2){
+	} else {
   	open_file(argv[1]);
   }
+  
+  _enable_raw();
+
   while(1){
     _refresh(eob);  // Clears buffer
     process_key();  // Repositions cursor
