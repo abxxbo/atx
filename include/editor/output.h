@@ -47,7 +47,7 @@ void _draw_rows(struct abuf *ab, char* eob_char) {
       if (E.numrows == 0 && y == E.screenrows / 3) {
         char welcome[80];
         int welcomelen = snprintf(welcome, sizeof(welcome),
-          "ATX editor v%s", ATX_VER);
+          "Welcome to ATX, the simple text editor.");
         if (welcomelen > E.screencols) welcomelen = E.screencols;
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {

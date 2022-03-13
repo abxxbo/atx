@@ -72,7 +72,6 @@ void set_eob(char* splitted) {
 #include <termios.h>
 #include <unistd.h>
 
-#define ATX_VER "0.0.1-beta"
 #include "output.h"
 
 #define CTRL_KEY(n) ((n) & 0x1f)
