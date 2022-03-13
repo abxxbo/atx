@@ -18,7 +18,11 @@
 #define ATXRC_CONFIG_LOCATION "/home/$(whoami)/.atxrc"
 
 void parse_config() {
-  system((char*)malloc(1 + strlen("touch ") + strlen(ATXRC_CONFIG_LOCATION)));
+	char command0[23+7] = "touch ";
+
+	// command0 => 'touch /home/$(whoami)/.atxrc'
+	strcat(command0, ATXRC_CONFIG_LOCATION);
+	system(command0);
 
   // Ok, file exists, not we can parse
 	// just need to open it and then parse
