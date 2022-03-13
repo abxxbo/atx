@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>atx: the easy editor</title>
+  </head>
+  <style>
+    /* text imports */
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap');
+
+    #titlebar, #quick-rundown, #install {
+      text-align: center;
+    }
+
+    #inshell {
+      width: 20%;
+      border-right: solid 1px black;
+    }
+
+    #modularconf {
+      padding-left: 2%;
+      width: 20%;
+    }
+
+    #inshell, #modularconf {
+      display: inline-block;
+    }
+
+    #scr {
+      display: block;
+      width: 50%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    h1, h2 {
+      /* fredoka */
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    h3, h4, h5, h6, p {
+      /* nunito */
+      font-family: 'Nunito', sans-serif;
+    }
+
+    code {
+      background-color: #eee;
+      border: 1px solid #999;
+      display: block;
+      margin-left: 30%;
+      margin-right: 30%;
+      text-align: left;
+      padding: 15px;
+      border-radius: 5px;
+    }
+  </style>
+  <body>
+    <div id="titlebar">
+      <h1>ATX: The simple text editor</h1>
+    </div>
+    <br>
+    <img src="https://github.com/abxxbo/atx/blob/main/img/c-styl.png?raw=true" id="scr">
+    <br>
+    <div id="quick-rundown">
+      <h2>atx is a terminal text editor requiring no external dependencies</h2>
+      <div id="features">
+        <h1>Features</h1>
+        <div id="features">
+          <div id="inshell">
+            <h2>Built-in shell</h2>
+            <p>Run any piece of code, directly inside atx.</p>
+            <br>
+          </div>
+          <div id="modularconf">
+            <h2>Easy Config System</h2>
+            <p>atx's simple configuration system makes it easy to configure.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div id="install">
+      <h1>Installing atx</h1>
+      <code>
+        $ git clone https://github.com/abxxbo/atx/
+        <br>
+        $ cd atx
+        <br>
+        $ make && sudo make install
+      </code>
+    </div>
+  </body>
+</html>
