@@ -1,5 +1,6 @@
 #!/bin/bash
 
+toks=()
 
 ## Ini file should just have the name that looks like
 ## [PLUGIN NAME].ini
@@ -7,13 +8,17 @@
 ## the metadata file would be called hello-world.ini.
 
 dir="$1"
-ini_file="$dir/${dir::-1}.ini" # remove the '/' from directory name
+ini_file="$dir${dir::-1}.ini" # remove the '/' from directory name
 
 while read -r line; do
   key=$(echo "$line" | cut -d'=' -f2)
   val=$(echo "$line" | cut -d'=' -f1)
-  echo "$val: $key"
+  if [[ "$key" != "[plugin]" ]]; then
+    toks+=($key)
+  fi
 done < "$ini_file"
+
+echo ${toks[@]}
 
 ## No arguments -- show help command
 if [[ "$#" == "0" ]]; then
