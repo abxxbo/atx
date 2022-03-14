@@ -9,3 +9,6 @@ jobs:
       - name: build
         run: |
           make
+			- name: build_sh
+				run: |
+						bash src/plugin/atx-plugin
