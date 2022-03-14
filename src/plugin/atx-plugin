@@ -1,7 +1,22 @@
 #!/bin/bash
 
+
+## Ini file should just have the name that looks like
+## [PLUGIN NAME].ini
+## For example: if we have a plugin named 'hello-world',
+## the metadata file would be called hello-world.ini.
+
+dir="$1"
+ini_file="$dir/${dir::-1}.ini" # remove the '/' from directory name
+
+while read -r line; do
+  key=$(echo "$line" | cut -d'=' -f2)
+  val=$(echo "$line" | cut -d'=' -f1)
+  echo "$val: $key"
+done < "$ini_file"
+
 ## No arguments -- show help command
 if [[ "$#" == "0" ]]; then
-  echo "Usage: atx-plugin [URL/Description]"
+  echo "Usage: atx-plugin [URL/Dir]"
   false
 fi
