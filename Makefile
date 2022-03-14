@@ -1,29 +1,36 @@
-## bash
-SHELL := bash
-.ONE_SHELL:
-.SHELLFLAGS := -eu -o pipefail -c
-.DELETE_ON_ERROR:
-MAKEFLAGS += --warn-undefined-variables
-MAKEFLAGS += --no-builtin-rules
+## Default goal is just building the editor
+.DEFAULT_GOAL := editor
 
-CC := cc
-CFLAGS := -Wall -Wextra -pedantic -std=c99 -Iinclude/editor/ -Iinclude/
 
-## Default to usr
-## Change with
-## sudo make install INSTALL_PREFIX=[directory]
-INSTALL_PREFIX ?= /usr
+## Directories / other variables
+BINARY_NAME := atx
+SRC_DIR 		:= src/
 
-.PHONY: atx
+## Main ATX editor variables and targets
+CC 			:= cc
+CFLAGS	:= -Iinclude/ -Iinclude/editor/ -Wall -Wextra \
+					 -pedantic -std=c2x -g -O2
 
-atx: src/atx.c
+editor: $(SRC_DIR)/editor/atx.c
 	@echo CC $^
-	@$(CC) $^ -o ./$@ $(CFLAGS)
+	@$(CC) $^ $(CFLAGS) -o ./$(BINARY_NAME)
 
-clean:
-	@echo RM atx
-	@rm atx
+## Plugin system variables and targets
+CC_		:= cc
+CFLAG := -Iinclude/plugins/ -Wall -Wextra -pedantic \
+				 -std=c2x -g -O2
+BIN_	:= atx-plugin
 
-install:
-	@echo CP ./atx => /usr/local/bin/atx
-	@sudo cp ./atx /usr/local/bin/atx
+plugins: $(SRC_DIR)/plugin/plugins.c
+	@echo CC $^
+	@$(CC_) $^ $(CFLAG) -o ./$(BIN_)
+
+install-plugins: $(BIN_)
+	@sudo cp $^ /usr/local/bin/$^
+
+## Other targets
+clean: $(BINARY_NAME)
+	@rm $^
+
+install: $(BINARY_NAME)
+	@sudo cp $^ /usr/local/bin/$^
