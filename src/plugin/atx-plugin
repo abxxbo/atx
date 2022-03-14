@@ -1,1 +1,7 @@
 #!/bin/bash
+
+## No arguments -- show help command
+if [[ "$#" == "0" ]]; then
+  echo "Usage: atx-plugin [URL/Description]"
+  false
+fi
