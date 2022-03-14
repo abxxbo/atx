@@ -2,6 +2,16 @@
 
 toks=()
 
+## downloads git repo
+function download(){
+  url="$1"
+  git clone "$url"
+}
+
+if [[ "$1" == "https://*" ]]; then
+  download "$1"
+fi
+
 ## Ini file should just have the name that looks like
 ## [PLUGIN NAME].ini
 ## For example: if we have a plugin named 'hello-world',
@@ -18,7 +28,10 @@ while read -r line; do
   fi
 done < "$ini_file"
 
-echo ${toks[@]}
+## Find header file
+hdr_file="$dir${dir::-1}.h"
+
+# do something
 
 ## No arguments -- show help command
 if [[ "$#" == "0" ]]; then
