@@ -56,7 +56,7 @@ sudo cp src/plugin/atx-plugin /usr/local/bin/atx-plugin
 ```
 
 ## Checklist
-- [ ] INI parser
+- [X] INI parser
 - [ ] Download requests from URL passed into program
 
 ## Basic usage
