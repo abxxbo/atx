@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+void parse_ini_metafile(char* file) {
+
+}
+
 void print_help() {
   fprintf(stderr, "atx-plugins [URL/dir]\n");
   fprintf(stderr, "  --help          print help and exit\n");
