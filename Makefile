@@ -15,19 +15,6 @@ editor: $(SRC_DIR)/editor/atx.c
 	@echo CC $^
 	@$(CC) $^ $(CFLAGS) -o ./$(BINARY_NAME)
 
-## Plugin system variables and targets
-CC_		:= cc
-CFLAG := -Iinclude/plugins/ -Wall -Wextra -pedantic \
-				 -std=c2x -g -O2
-BIN_	:= atx-plugin
-
-plugins: $(SRC_DIR)/plugin/plugins.c
-	@echo CC $^
-	@$(CC_) $^ $(CFLAG) -o ./$(BIN_)
-
-install-plugins: $(BIN_)
-	@sudo cp $^ /usr/local/bin/$^
-
 ## Other targets
 clean: $(BINARY_NAME)
 	@rm $^

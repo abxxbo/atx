@@ -48,15 +48,16 @@ This is a list of all milestones that have been accomplished.
 
 # Plugins
 
-A stand alone program has been written to make and manage plugins for atx. You can compile this via
-```
-make plugins
+A stand alone program has been written to make and manage plugins for atx. Compiling is not needed, since
+it's a bash script. You can install this by this command:
+```sh
+# or whereever you want to install it, not just  /usr/local/bin/
+sudo cp src/plugin/atx-plugin /usr/local/bin/atx-plugin
 ```
 
 ## Checklist
 - [ ] INI parser
 - [ ] Download requests from URL passed into program
-- [ ] Seperate rule in Makefile for compiling plugins program
 
 ## Basic usage
 Example plugins can be found in the plugins/ directory. You may install a plugin via:
