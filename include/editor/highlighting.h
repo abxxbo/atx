@@ -76,6 +76,12 @@ char* PY_HL_keywords[] = {
   NULL
 };
 
+// markdown
+char* MD_HL_extensions[] = { ".md", NULL };
+char* MD_HL_keywords[]   = {
+	"#", "##", "###", "####", "#####", "-", "1.", NULL
+};
+
 // DB of syntax highlighting
 struct edit_syntax HLDB[] = {
   // Systems languages
@@ -107,7 +113,15 @@ struct edit_syntax HLDB[] = {
     PY_HL_keywords,
     "#", "\"\"\"", "\"\"\"",
     HL_NUM | HL_STR
-  }
+  },
+	// documentation languages
+	{
+		"md",
+		MD_HL_extensions,
+		MD_HL_keywords,
+		"//",						// tbh idk this
+		HL_NUM | HL_STR
+	}
 };
 
 #define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
