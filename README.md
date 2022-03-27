@@ -4,6 +4,6 @@
 
 ATX is a simple to use text editor written in C with no dependencies. It has no mode system (like VIM), so it is very easy to use.
 
-<img src="img/py-styl.png" alt="wtf are you looking at p2" align="right" height="240px">
+<img src="img/py-styl.png" alt="wtf are you looking at p2" align="right" height="240px" width="48%">
 
 It has syntax highlighting for various popular languages, along with a standalone plugin system.
